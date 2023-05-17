@@ -123,22 +123,62 @@ namespace Company.Function
 
 ```
 
-5\. Add the following package reference to the *.csproj* file: 
+5\. Install the required extensions using standard NuGet package installation methods, such as `dotnet add package`
+- [Microsoft.Azure.Functions.Worker.Extensions.DurableTask]()
+- [Microsoft.Azure.Functions.Worker.Extensions.DurableTask.SqlServer]()
+- [Microsoft.Azure.Functions.Worker.Extensions.Http]()
 
+6\. Make sure the following package references are in the *.csproj* file: 
 ```sh
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.DurableTask" Version="1.0.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.DurableTask.SqlServer" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
 ```
 
 ## Setting up database 
 
 As the MSSQL backend is designed for portability, you have several options to set up your backing database. For example, you can set up an on-premises SQL Server instance, use a fully managed Azure SQL DB, or use any other SQL Server-compatible hosting option.
 
-You can also do local, offline development with SQL Server Express on your local Windows machine or use SQL Server Docker image running in a Docker container. To set up a local Docker-based SQL Server, follow [these instructions](https://learn.microsoft.com/azure/azure-functions/durable/quickstart-mssql#set-up-your-local-docker-based-sql-server). Be sure to update your *host.json* and *local.settings.json* as described in the article. 
+You can also do local, offline development with SQL Server Express on your local Windows machine or use SQL Server Docker image running in a Docker container. To set up a local Docker-based SQL Server, follow [these instructions](https://learn.microsoft.com/azure/azure-functions/durable/quickstart-mssql#set-up-your-local-docker-based-sql-server). 
 
 To run your app on Azure, you'll need a publicly accessible SQL Server instance. If you want to create an Azure SQL Database, follow [these instructions](https://learn.microsoft.com/azure/azure-functions/durable/quickstart-mssql#create-an-azure-sql-database). 
 
-## Build the container image and Test locally
+Whether you are running your app locally or on Azure, be sure to update your *host.json*:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true", 
+    "SQLDB_Connection": "<<Your connection string >>",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated"
+  }
+}
+```
+and *local.settings.json*:
+
+```json
+{
+  "version": "2.0",
+  "extensions": {
+    "durableTask": {
+      "storageProvider": {
+        "type": "mssql",
+        "connectionStringName": "SQLDB_Connection",
+        "createDatabaseIfNotExists": true 
+        }
+    }
+  },
+  "logging": {
+    "logLevel": {
+      "DurableTask.SqlServer": "Warning",
+      "DurableTask.Core": "Warning"
+    }
+  }
+}  
+```
+
+## Build the container image 
 
 The Dockerfile in the project root describes the minimum required environment to run the function app in a container. The complete list of supported base images for Azure Functions is documented above as **Host images** in the pre-requisites section or can be found in the [Azure Functions Base by Microsoft \| Docker
 Hub](https://hub.docker.com/_/microsoft-azure-functions-base)
