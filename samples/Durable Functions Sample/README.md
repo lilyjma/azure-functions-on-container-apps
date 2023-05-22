@@ -143,7 +143,7 @@ You can also do local, offline development with SQL Server Express on your local
 
 To run your app on Azure, you'll need a publicly accessible SQL Server instance. If you want to create an Azure SQL Database, follow [these instructions](https://learn.microsoft.com/azure/azure-functions/durable/quickstart-mssql#create-an-azure-sql-database). 
 
-Whether you are running your app locally or on Azure, be sure to update your *host.json*:
+Whether you are running your app locally or on Azure, be sure to update your *local.settings.json*:
 
 ```json
 {
@@ -155,7 +155,7 @@ Whether you are running your app locally or on Azure, be sure to update your *ho
   }
 }
 ```
-and *local.settings.json*:
+and *host.json*:
 
 ```json
 {
